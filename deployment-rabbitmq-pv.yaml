@@ -1,0 +1,84 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: read
+  labels:
+    app: read-deployment
+spec:
+  selector:
+    matchLabels:
+      app: read-app
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: read-app
+    spec:
+      containers:
+        - name: cognitive-services-read
+          image: mcr.microsoft.com/azure-cognitive-services/vision/read:3.2
+          ports:
+            - containerPort: 5000
+          resources:
+            requests:
+              cpu: 100m
+              memory: 1Gi
+            limits:
+              cpu: 300m
+              memory: 2Gi
+          env:
+            - name: EULA
+              value: accept
+            - name: billing
+              value: https://eastus.api.cognitive.microsoft.com
+            - name: apikey
+              value: #58abacb643034607896304d75....
+            - name: Queue__RabbitMQ__HostName
+              value: rabbitmq-1629224177.default.svc
+            - name: Queue__RabbitMQ__VirtualHost
+              value: "/"
+            - name: Queue__RabbitMQ__Username
+              value: user
+            - name: Queue__RabbitMQ__Password
+              value: eYQ3ZP6SAu
+            - name: Queue__RabbitMQ__Port
+              value: "5672"
+          volumeMounts:
+            - name: read-data
+              mountPath: /share
+              readOnly: false
+          livenessProbe:
+            httpGet:
+              path: /ContainerLiveness
+              port: 5000
+            initialDelaySeconds: 60
+            periodSeconds: 60
+            timeoutSeconds: 20
+      volumes:
+        - name: read-data
+          persistentVolumeClaim:
+            claimName: read-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: azure-cognitive-service-read
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 5000
+      targetPort: 5000
+  selector:
+    app: read-app
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: read-pvc
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: azurefile
+  resources:
+    requests:
+      storage: 5Gi
