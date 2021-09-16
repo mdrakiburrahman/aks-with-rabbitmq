@@ -32,15 +32,15 @@ spec:
             - name: billing
               value: https://eastus.api.cognitive.microsoft.com
             - name: apikey
-              value: #58abacb643034607896304d75....
+              value: 413ad0ac8df743258e1f118944cd6fe8 # Localize
             - name: Queue__RabbitMQ__HostName
-              value: rabbitmq-1629224177.default.svc
+              value: rabbitmq-1631801457.default.svc # Localize
             - name: Queue__RabbitMQ__VirtualHost
               value: "/"
             - name: Queue__RabbitMQ__Username
               value: user
             - name: Queue__RabbitMQ__Password
-              value: eYQ3ZP6SAu
+              value: B5VeuDLHWq # Localize
             - name: Queue__RabbitMQ__Port
               value: "5672"
           volumeMounts:
