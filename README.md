@@ -3,79 +3,97 @@
 We showcase the following entities in this repo:
 ![Architecture Diagram](Architecture.png)
 
-## First things first
+## Demo environment setup
 
-Follow [this](https://docs.microsoft.com/en-us/azure/cognitive-services/computer-vision/deploy-computer-vision-on-premises#deploy-multiple-v3-containers-on-the-kubernetes-cluster) tutorial's sections of:
+We follow [this](https://docs.microsoft.com/en-us/azure/cognitive-services/computer-vision/deploy-computer-vision-on-premises#deploy-multiple-v3-containers-on-the-kubernetes-cluster) tutorial's sections of:
 
+- Prerequisites
+- Gathering required parameters
+
+## Powershell script
+
+The following Powershell script can be used to setup the end-to-end demo environment in one pass:
+
+```PowerShell
+az account set --subscription "<your-subscription-name>"
+$rg = "your-rg"
+az group create --name $rg --location EastUS
+
+$cognitive_name = "your-unique-cognitive-svc-name"
+
+# Create Cognitive Services Resource
+az cognitiveservices account create `
+    --name $cognitive_name `
+    --resource-group $rg `
+    --kind CognitiveServices `
+    --sku S0 `
+    --location canadacentral `
+    --yes
+
+az cognitiveservices account keys list `
+    --name $cognitive_name `
+    --resource-group $rg
+
+# {
+#  "key1": "413ad0ac8df743258e...",
+#  "key2": "582395cad305440387..."
+# }
+
+# Create AKS cluster
+$k8s = "your-aks-cluster"
+az aks create -g $rg `
+							--name $k8s `
+							--ssh-key-value 'ssh-rsa AAAAB3N...LBISw==' `
+							--node-count 3 `
+							--node-vm-size Standard_D4s_v3 # 4 vCPU, 16 GB RAM
+
+# Grab kubeconfig from AKS
+az aks get-credentials -g $rg --name $k8s
+kubectl get nodes
+
+# Create RabbitMQ
+helm repo add azure-marketplace https://marketplace.azurecr.io/helm/v1/repo
+helm install azure-marketplace/rabbitmq --generate-name
+
+# Get secret name
+kubectl get secret --all-namespaces | grep rabbitmq
+# rabbitmq-1631876849
+
+$base64_secret = kubectl get secret --namespace default rabbitmq-1631876849 -o jsonpath="{.data.rabbitmq-password}"
+[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($base64_secret))
+# OT9W0C3V75
+
+# Access RabbitMQ UI
+kubectl get svc -n default | grep rabbitmq
+# rabbitmq-1631876849
+
+kubectl port-forward --namespace default svc/rabbitmq-1631876849 15672:15672
+# http://127.0.0.1:15672/
+
+# Localize dpeloyment yaml ...\aks-with-rabbitmq\deployment-rabbitmq-pv.yaml - see instructions below before running kubectl apply -f ..
+
+# Create pods
+kubectl apply -f ...\aks-with-rabbitmq\deployment-rabbitmq-pv.yaml
+
+# Pods get deployed
+# kubectl get pods
+# NAME                    READY   STATUS    RESTARTS   AGE
+# rabbitmq-1631801457-0   1/1     Running   0          39m
+# read-958db58bc-975js    1/1     Running   0          56s
+# read-958db58bc-hl8x6    1/1     Running   0          56s
+# read-958db58bc-hnqxw    1/1     Running   0          56
+
+# Tail logs
+kubectl logs read-958db58bc-dszm4 --follow
+kubectl logs read-958db58bc-ksw5h --follow
+kubectl logs read-958db58bc-nsm9j --follow
+
+# Localize test.py with the external LB
+kubectl get svc -n default | grep azure-cognitive-service-read
+# 52.188.143.206
 ```
-Prerequisites
-Gathering required parameters
-```
 
-For example purposes, I called the computer vision resoruce `aks-with-rabbitmq-cv`
-
-## Setup the AKS cluster
-
-1. Create a resource group (e.g. aks-with-rabbitmq-rg)
-2. Create a Kubernetes Service (e.g. aks-with-rabbitmq-cluster) [I used all default settings]
-3. Connect with the AKS cluster with this command:
-   `az aks get-credentials --resource-group MyResourceGroup --name MyCluster`
-
-For example:
-`az aks get-credentials --resource-group aks-with-rabbitmq-rg --name aks-with-rabbitmq-cluster`
-
-To check, run `kubectl get all`, output should be:
-
-`service/kubernetes ClusterIP 10.0.0.1 <none> 443/TCP 57m `
-
-## Create RabbitMQ Pod
-
-1. Run `helm repo add azure-marketplace https://marketplace.azurecr.io/helm/v1/repo`
-2. Run `helm install azure-marketplace/rabbitmq --generate-name`
-
-Output should be similar to:
-
-```
-NAME: rabbitmq-1629212308
-LAST DEPLOYED: Tue Aug 17 10:58:33 2021
-NAMESPACE: default
-STATUS: deployed
-REVISION: 1
-TEST SUITE: None
-NOTES:
-** Please be patient while the chart is being deployed **
-
-Credentials:
-    echo "Username      : user"
-    echo "Password      : $(kubectl get secret --namespace default rabbitmq-1629212308 -o jsonpath="{.data.rabbitmq-password}" | base64 --decode)"
-    echo "ErLang Cookie : $(kubectl get secret --namespace default rabbitmq-1629212308 -o jsonpath="{.data.rabbitmq-erlang-cookie}" | base64 --decode)"
-
-Note that the credentials are saved in persistent volume claims and will not be changed upon upgrade or reinstallation unless the persistent volume claim has been deleted. If this is not the first installation of this chart, the credentials may not be valid.
-This is applicable when no passwords are set and therefore the random password is autogenerated. In case of using a fixed password, you should specify it when upgrading.
-More information about the credentials may be found at https://docs.bitnami.com/general/how-to/troubleshoot-helm-chart-issues/#credential-errors-while-upgrading-chart-releases.
-
-RabbitMQ can be accessed within the cluster on port  at rabbitmq-1629212308.default.svc.
-
-To access for outside the cluster, perform the following steps:
-
-To Access the RabbitMQ AMQP port:
-
-    echo "URL : amqp://127.0.0.1:5672/"
-    kubectl port-forward --namespace default svc/rabbitmq-1629212308 5672:5672
-
-To Access the RabbitMQ Management interface:
-
-    echo "URL : http://127.0.0.1:15672/"
-    kubectl port-forward --namespace default svc/rabbitmq-1629212308 15672:15672
-```
-
-Running `kubectl get pods` should result in:
-`rabbitmq-1629212308-0 1/1 Running 0 5m6s`
-
-For the RabbitMQ UI management portal run:
-`kubectl port-forward --namespace default svc/NAME 15672:15672`
-
-## Prepare deployment.yaml
+### Prepare deployment.yaml
 
 In `deployment.yaml`:
 
@@ -84,28 +102,20 @@ In `deployment.yaml`:
 3. Fill `Queue__RabbitMQ__VirtualHost` with the deafult `/`
 4. Fill `Queue__RabbitMQ__Username` and `Queue__RabbitMQ__Password` with the commands from the RabbitMQ pod generation output
 
-Username is probably `user` and password is a random 10 character string.
+Username is `user` and password is a random 10 character string.
 
 5. Fill `Queue__RabbitMQ__Port` with the default `5672`
-6. Set `replicas` to `3` or any number you want.
+6. Set `replicas` to `3` or other depending on K8s capacity.
 
-## Deploy
+## Test UI
 
-Run `kubectl apply -f deployment.yaml`
-
-If you run, `kubectl get pods`, you should see 4 (replicas+1) pods.
-
-If you run, `kubectl get services`, under `EXTERNAL-IP` for TYPE `LoadBalancer` will be `PENDING`.
-
-Wait for a few minutes and check again, an actualy IP,`XX.XXX.XX.255` should be there.
-
-## Test
-
-To test it worked, in your browser run `EXTERNAL-IP:5000`.
+To test it worked, in your browser run `EXTERNAL-IP:5000` - e.g. `52.188.143.206:5000`.
 
 You should get the following output:
 
 ![Screenshot](success.png)
+
+You can also browse to the swagger UI via `http://52.188.143.206:5000/swagger`.
 
 ## Test with Python
 
