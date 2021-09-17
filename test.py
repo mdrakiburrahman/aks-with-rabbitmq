@@ -1,7 +1,6 @@
 import requests
 import json
 import time
-import polling
 
 external_ip = "52.226.180.143"
 
