@@ -41,11 +41,10 @@ az cognitiveservices account keys list `
 
 # Create AKS cluster
 $k8s = "your-aks-cluster"
-az aks create -g $rg `
-							--name $k8s `
-							--ssh-key-value 'ssh-rsa AAAAB3N...LBISw==' `
-							--node-count 3 `
-							--node-vm-size Standard_D4s_v3 # 4 vCPU, 16 GB RAM
+az aks create -g $rg --name $k8s `
+					 --ssh-key-value 'ssh-rsa AAAAB3N...LBISw==' `
+					 --node-count 3 `
+					 --node-vm-size Standard_D4s_v3 # 4 vCPU, 16 GB RAM
 
 # Grab kubeconfig from AKS
 az aks get-credentials -g $rg --name $k8s
