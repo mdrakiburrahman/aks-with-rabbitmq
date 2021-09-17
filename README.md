@@ -136,7 +136,7 @@ The output should be an array of the following object:
 
 # Notes
 
-### NTP outbound
+### 1. NTP outbound
 
 At this time, note that the Containers reach out to `time.windows.com` for syncing system time. If NTP outbound (`UDP 123`) is blocked on the Pod - the following logs show up:
 
