@@ -3,7 +3,7 @@ import json
 import time
 import polling
 
-external_ip = "52.188.143.206"
+external_ip = "52.226.180.143"
 
 # Sync
 print("####################### SYNC #######################")

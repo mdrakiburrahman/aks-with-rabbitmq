@@ -30,17 +30,17 @@ spec:
             - name: EULA
               value: accept
             - name: billing
-              value: https://eastus.api.cognitive.microsoft.com
+              value: https://<your-cognitive-services-acct>.cognitiveservices.azure.com # Localize - note that this can also be in the form https://canadacentral.api.cognitive.microsoft.com
             - name: apikey
-              value: 413ad0ac8df743258e1f118944cd6fe8 # Localize
+              value: <your-api-key> # Localize
             - name: Queue__RabbitMQ__HostName
-              value: rabbitmq-1631801457.default.svc # Localize
+              value: rabbitmq-1631876849.default.svc # Localize
             - name: Queue__RabbitMQ__VirtualHost
               value: "/"
             - name: Queue__RabbitMQ__Username
               value: user
             - name: Queue__RabbitMQ__Password
-              value: B5VeuDLHWq # Localize
+              value: OT9W0C3V75 # Localize
             - name: Queue__RabbitMQ__Port
               value: "5672"
           volumeMounts:
