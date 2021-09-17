@@ -131,3 +131,20 @@ The output should be an array of the following object:
     "text": "as"
 }
 ```
+
+---
+
+# Notes
+
+### NTP outbound
+
+At this time, note that the Containers reach out to `time.windows.com` for syncing system time. If NTP outbound (`UDP 123`) is blocked on the Pod - the following logs show up:
+
+```text
+Sync time from NTP server: time.windows.com but failed. Exception is    at System.Net.Sockets.Socket.Receive(Byte[] buffer)
+   at Microsoft.CloudAI.Containers.OCR.NTPUtility.SyncNtpTimeOffset() in /source/containers-Metered/src/Common/Utility/NTPUtility.cs:line 76
+:line 76
+```
+
+Preliminary tests show that these should be non-blocking from performing Inference calls:
+![NTP outbound](deny-ntp.png)
