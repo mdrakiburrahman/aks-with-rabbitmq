@@ -52,6 +52,7 @@ kubectl get nodes
 
 # Create RabbitMQ
 helm repo add azure-marketplace https://marketplace.azurecr.io/helm/v1/repo
+helm repo update
 helm install azure-marketplace/rabbitmq --generate-name
 
 # Get secret name
