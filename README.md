@@ -1,7 +1,7 @@
-# aks-with-rabbitmq
+# cognitive-services-k8s
 
 We showcase the following entities in this repo:
-![Architecture Diagram](Architecture.png)
+![Architecture Diagram](images/Architecture.png)
 
 ## Demo environment setup
 
@@ -10,7 +10,10 @@ We follow [this](https://docs.microsoft.com/en-us/azure/cognitive-services/compu
 - Prerequisites
 - Gathering required parameters
 
-## Powershell script
+## Powershell script: AKS - 3 Read pods + RabbitMQ
+
+<details>
+<summary>Detailed steps</summary>
 
 The following Powershell script can be used to setup the end-to-end demo environment in one pass:
 
@@ -93,6 +96,8 @@ kubectl get svc -n default | grep azure-cognitive-service-read
 # 52.188.143.206
 ```
 
+</details>
+
 ### Prepare deployment.yaml
 
 In `deployment.yaml`:
@@ -113,15 +118,15 @@ To test it worked, in your browser run `EXTERNAL-IP:5000` - e.g. `52.188.143.206
 
 You should get the following output:
 
-![Screenshot](success.png)
+![Screenshot](images/success.png)
 
 You can also browse to the swagger UI via `http://52.188.143.206:5000/swagger`.
 
 ## Test with Python
 
-In `test.py`, update the `external_ip` variable with your `EXTERNAL-IP`
+In `test-scripts/read-test.py`, update the `external_ip` variable with your `EXTERNAL-IP`
 
-Run `python test.py`.
+Run `python read-test.py`.
 
 The output should be an array of the following object:
 
@@ -157,4 +162,11 @@ Sync time from NTP server: time.windows.com but failed. Exception is    at Syste
 ```
 
 Preliminary tests show that these should be non-blocking from performing Inference calls:
-![NTP outbound](deny-ntp.png)
+![NTP outbound](images/deny-ntp.png)
+
+NTP Sync can also be disabled via setting the Container environment variable:
+
+```yaml
+- name: EnableSyncNTPServer
+  value: "false"
+```

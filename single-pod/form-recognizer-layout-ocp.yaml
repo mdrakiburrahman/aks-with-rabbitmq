@@ -1,22 +1,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: read
+  name: form-recognizer-layout
   labels:
-    app: read-deployment
+    app: form-recognizer-layout-deployment
 spec:
   selector:
     matchLabels:
-      app: read-app
+      app: form-recognizer-layout-app
   replicas: 1
   template:
     metadata:
       labels:
-        app: read-app
+        app: form-recognizer-layout-app
     spec:
       containers:
-        - name: cognitive-services-read
-          image: mcr.microsoft.com/azure-cognitive-services/vision/read:3.2
+        - name: cognitive-services-form-recognizer-layout
+          image: mcr.microsoft.com/azure-cognitive-services/form-recognizer/layout
           ports:
             - containerPort: 5000
           resources:
@@ -24,15 +24,15 @@ spec:
               cpu: 250m
               memory: 1Gi
             limits:
-              cpu: 1000m
-              memory: 5Gi
+              cpu: 3000m
+              memory: 16Gi
           env:
             - name: EULA
               value: accept
             - name: billing
-              value: https://<your-cognitive-services>.cognitiveservices.azure.com/ # Localize - note that this can also be in the form https://canadacentral.api.cognitive.microsoft.com
+              value: https://canadacentral.api.cognitive.microsoft.com/ # Localize - note that this can also be in the form https://canadacentral.api.cognitive.microsoft.com
             - name: apikey
-              value: eb... # Localize
+              value: daff... # Localize
             - name: HTTP_PROXY
               value: http://<your-proxy>.com:XXXX # Localize
             - name: EnableSyncNTPServer
@@ -50,7 +50,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: raki-cognitive-read
+  name: raki-cognitive-form-recognizer-layout
 spec:
   type: ClusterIP
   ports:
@@ -58,17 +58,17 @@ spec:
       port: 443
       targetPort: 5000
   selector:
-    app: read-app
+    app: form-recognizer-layout-app
 ---
 kind: Route
 apiVersion: route.openshift.io/v1
 metadata:
-  name: raki-cognitive-read-route
+  name: raki-cognitive-form-recognizer-layout-route
 spec:
-  host: raki-cognitive-read.apps.ocp-env.your-route.com
+  host: raki-cognitive-form-recognizer-layout.apps.ocp-env.your-route.com
   to:
     kind: Service
-    name: raki-cognitive-read
+    name: raki-cognitive-form-recognizer-layout
     weight: 100
   port:
     targetPort: 5000
