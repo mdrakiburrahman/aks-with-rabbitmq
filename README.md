@@ -3,6 +3,9 @@
 We showcase the following entities in this repo:
 ![Architecture Diagram](images/Architecture.png)
 
+## Dev Container
+The folder `.devcontainer` has necessary tools to get started on this demo with [Remote Containers](https://code.visualstudio.com/docs/remote/containers).
+
 ## Demo environment setup
 
 We follow [this](https://docs.microsoft.com/en-us/azure/cognitive-services/computer-vision/deploy-computer-vision-on-premises#deploy-multiple-v3-containers-on-the-kubernetes-cluster) tutorial's sections of:
@@ -17,37 +20,50 @@ We follow [this](https://docs.microsoft.com/en-us/azure/cognitive-services/compu
 
 The following Powershell script can be used to setup the end-to-end demo environment in one pass:
 
-```PowerShell
-az account set --subscription "<your-subscription-name>"
-$rg = "your-rg"
+```bash
+# Variables
+spnClientId="..."
+spnClientSecret="..."
+spnTenantId="..."
+subscriptionId="..."
+rg="raki-cogs-1"
+k8s="aks-cni"
+cognitive_name="raki-cogs-multi-1"
+
+# Login to Azure
+az login --service-principal --username $spnClientId --password $spnClientSecret --tenant $spnTenantId
+az account set --subscription $subscriptionId
+
+# Create RG
 az group create --name $rg --location EastUS
 
-$cognitive_name = "your-unique-cognitive-svc-name"
-
 # Create Cognitive Services Resource
-az cognitiveservices account create `
-    --name $cognitive_name `
-    --resource-group $rg `
-    --kind CognitiveServices `
-    --sku S0 `
-    --location canadacentral `
+az cognitiveservices account create \
+    --name $cognitive_name \
+    --resource-group $rg \
+    --kind CognitiveServices \
+    --sku S0 \
+    --location EastUS \
     --yes
 
-az cognitiveservices account keys list `
-    --name $cognitive_name `
+az cognitiveservices account keys list \
+    --name $cognitive_name \
     --resource-group $rg
 
 # {
-#  "key1": "413ad0ac8df743258e...",
-#  "key2": "582395cad305440387..."
+#   "key1": "130b03c5d84048f296571525141a3d33",
+#   "key2": "fc5a6fed573640c9816a099db8e9f527"
 # }
 
 # Create AKS cluster
-$k8s = "your-aks-cluster"
-az aks create -g $rg --name $k8s `
-					 --ssh-key-value 'ssh-rsa AAAAB3N...LBISw==' `
-					 --node-count 3 `
-					 --node-vm-size Standard_D4s_v3 # 4 vCPU, 16 GB RAM
+# 8 vCPU, 32 GB RAM
+az aks create -g $rg --name $k8s \
+                     --node-count 3 \
+                     --enable-cluster-autoscaler \
+                     --min-count 1 \
+                     --max-count 5 \
+                     --generate-ssh-keys \
+                     --node-vm-size Standard_D8s_v3
 
 # Grab kubeconfig from AKS
 az aks get-credentials -g $rg --name $k8s
@@ -60,40 +76,39 @@ helm install azure-marketplace/rabbitmq --generate-name
 
 # Get secret name
 kubectl get secret --all-namespaces | grep rabbitmq
-# rabbitmq-1631876849
-
-$base64_secret = kubectl get secret --namespace default rabbitmq-1631876849 -o jsonpath="{.data.rabbitmq-password}"
-[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($base64_secret))
-# OT9W0C3V75
+# rabbitmq-1643850952
+base64_secret=$(kubectl get secret --namespace default rabbitmq-1643850952 -o jsonpath="{.data.rabbitmq-password}")
+# Decode
+echo $base64_secret | base64 --decode
+# SvWBo1uNKv
 
 # Access RabbitMQ UI
 kubectl get svc -n default | grep rabbitmq
-# rabbitmq-1631876849
-
-kubectl port-forward --namespace default svc/rabbitmq-1631876849 15672:15672
+# rabbitmq-1643850952
+kubectl port-forward --namespace default svc/rabbitmq-1643850952 15672:15672
 # http://127.0.0.1:15672/
 
-# Localize dpeloyment yaml ...\aks-with-rabbitmq\deployment-rabbitmq-pv.yaml - see instructions below before running kubectl apply -f ..
-
-# Create pods
-kubectl apply -f ...\aks-with-rabbitmq\deployment-rabbitmq-pv.yaml
+# Localize deployment yaml ...\multi-pod\read-rabbitmq-pv.yaml.yaml - see instructions below before running kubectl apply -f ..
+kubectl apply -f multi-pod/read-rabbitmq-pv.yaml
 
 # Pods get deployed
 # kubectl get pods
 # NAME                    READY   STATUS    RESTARTS   AGE
-# rabbitmq-1631801457-0   1/1     Running   0          39m
-# read-958db58bc-975js    1/1     Running   0          56s
-# read-958db58bc-hl8x6    1/1     Running   0          56s
-# read-958db58bc-hnqxw    1/1     Running   0          56
+# rabbitmq-1643850952-0   1/1     Running   0          28m
+# read-6fdddf88cd-5lzhv   1/1     Running   0          17m
+# read-6fdddf88cd-bxrnq   1/1     Running   0          17m
+# read-6fdddf88cd-d7bl7   1/1     Running   0          17m
+# read-6fdddf88cd-rll99   1/1     Running   0          17m
+# read-6fdddf88cd-zc7qk   1/1     Running   0          17m
 
 # Tail logs
 kubectl logs read-958db58bc-dszm4 --follow
 kubectl logs read-958db58bc-ksw5h --follow
-kubectl logs read-958db58bc-nsm9j --follow
+# ...
 
 # Localize test.py with the external LB
 kubectl get svc -n default | grep azure-cognitive-service-read
-# 52.188.143.206
+# 20.121.145.67
 ```
 
 </details>
