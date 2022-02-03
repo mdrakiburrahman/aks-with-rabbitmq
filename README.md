@@ -145,7 +145,7 @@ cd test-scripts
 python3 -m venv env
 source env/bin/activate
 python3 -m pip install -r requirements.txt
-python3 read-test.py
+python3 read-test-benchmark-bigfile.py
 ```
 
 In `test-scripts/read-test.py`, update the `external_ip` variable with your `EXTERNAL-IP`
@@ -170,6 +170,14 @@ The output should be an array of the following object:
     "text": "as"
 }
 ```
+
+With `read-test-benchmark-bigfile.py` - we scan 2 PDFs and capture the timestamp - we see the following results showcasing that more pods helps reduce the time significatly via horizontal scaling:
+| PDF Pages | Pods | Time taken (s) |
+| --- | --- | --- |
+| 2 | 5 | 3.02 |
+| 20 | 5 | 🟢 19.18 |
+| 2 | 1 | 3.33 |
+| 20 | 1 | 🔴 45.8 |
 
 ---
 
