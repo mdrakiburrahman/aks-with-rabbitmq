@@ -139,9 +139,18 @@ You can also browse to the swagger UI via `http://52.188.143.206:5000/swagger`.
 
 ## Test with Python
 
+```bash
+# create venv
+cd test-scripts
+python3 -m venv env
+source env/bin/activate
+python3 -m pip install -r requirements.txt
+python3 read-test.py
+```
+
 In `test-scripts/read-test.py`, update the `external_ip` variable with your `EXTERNAL-IP`
 
-Run `python read-test.py`.
+Run `python3 read-test.py`.
 
 The output should be an array of the following object:
 

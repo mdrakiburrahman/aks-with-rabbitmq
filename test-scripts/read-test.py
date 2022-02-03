@@ -2,14 +2,14 @@ import requests
 import json
 import time
 
-external_ip = "52.226.180.143"
+external_ip = "20.121.145.67"
 
 # Sync
 print("####################### SYNC #######################")
 
 endpoint = 'http://'+ external_ip +':5000/vision/v3.2/read/syncAnalyze'
 
-file = 'https://raw.githubusercontent.com/mdrakiburrahman/form-recognizer/main/artifacts/mortgage.pdf'
+file = 'https://raw.githubusercontent.com/mdrakiburrahman/cognitive-services-k8s/main/test-files/mortgage.pdf'
 response = requests.post(endpoint, \
                          headers={'accept': 'application/json'
                          , 'Content-Type': 'application/json'},

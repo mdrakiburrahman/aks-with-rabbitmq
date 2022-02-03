@@ -85,7 +85,8 @@ RUN echo "Installing sqlpackage" \
 # Install Python
 USER root
 RUN apt-get update -y \
-    && apt-get install -y python
+    && apt-get install -y python3.9 \
+    && apt-get install -y python3.8-venv
 
 # Clean up
 RUN apt-get autoremove -y \
