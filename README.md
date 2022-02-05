@@ -2,6 +2,7 @@
 
 ## Table of Contents <!-- omit in toc -->
 - [Architecture Diagrams](#architecture-diagrams)
+- [Python Image Refresher](#python-image-refresher)
 - [Demo environment setup](#demo-environment-setup)
     - [Dev Container](#dev-container)
     - [Bash script](#bash-script)
