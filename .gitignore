@@ -1,5 +1,5 @@
 Sample_Blobs/
 .vscode/settings.json
 test-scripts/demo-test.sh
-test-scripts/env/*
+*/env/*
 test-scripts/inference/*

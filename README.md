@@ -1,19 +1,46 @@
-# cognitive-services-k8s
+# Cognitive Services on Kubernetes
+
+## Table of Contents <!-- omit in toc -->
+- [Architecture Diagrams](#architecture-diagrams)
+- [Demo environment setup](#demo-environment-setup)
+    - [Dev Container](#dev-container)
+    - [Bash script](#bash-script)
+    - [Test UI](#test-ui)
+    - [Test with Python](#test-with-python)
+- [Lessons Learned](#lessons-learned)
+
+
+# Architecture Diagrams
 
 We showcase the following entities in this repo:
 ![Architecture Diagram](images/Architecture.png)
 
-## Dev Container
-The folder `.devcontainer` has necessary tools to get started on this demo with [Remote Containers](https://code.visualstudio.com/docs/remote/containers).
+# Python Image Refresher
+```Python
+# create venv
+cd image-refresher
+python3 -m venv env
+source env/bin/activate
+python3 -m pip install -r requirements.txt
+ipython kernel install --user --name=env # Install new kernel for Jupyter
 
-## Demo environment setup
+python3 ....py
+```
+
+
+# Demo environment setup
 
 We follow [this](https://docs.microsoft.com/en-us/azure/cognitive-services/computer-vision/deploy-computer-vision-on-premises#deploy-multiple-v3-containers-on-the-kubernetes-cluster) tutorial's sections of:
 
 - Prerequisites
 - Gathering required parameters
 
-## Powershell script: AKS - 3 Read pods + RabbitMQ
+## Dev Container
+The folder `.devcontainer` has necessary tools to get started on this demo with [Remote Containers](https://code.visualstudio.com/docs/remote/containers).
+
+## Bash script
+
+The following script deploys an AKS - 3 Read pods + RabbitMQ.
 
 <details>
 <summary>Detailed steps</summary>
@@ -181,7 +208,7 @@ With `read-test-benchmark-bigfile.py` - we scan 2 PDFs and capture the timestamp
 
 ---
 
-# Notes
+# Lessons learned
 
 ### 1. NTP outbound
 
