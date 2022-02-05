@@ -16,6 +16,12 @@ We showcase the following entities in this repo:
 ![Architecture Diagram](images/Architecture.png)
 
 # Python Image Refresher
+The official docs below:
+* https://docs.microsoft.com/en-us/azure/cognitive-services/cognitive-services-container-support
+* https://docs.microsoft.com/en-us/azure/cognitive-services/containers/container-image-tags?tabs=previous
+
+...do not synchronously get updated with the latest container images/tags. So I created a Python script to scrape Microsoft Container Registry to generate the latest builds. This way, if a new container is released, this script will pick it up.
+
 ```Python
 # create venv
 cd image-refresher
@@ -24,9 +30,8 @@ source env/bin/activate
 python3 -m pip install -r requirements.txt
 ipython kernel install --user --name=env # Install new kernel for Jupyter
 
-python3 ....py
+# Run image-refresher.ipynb - which will spit out a markdown file containing all images
 ```
-
 
 # Demo environment setup
 
