@@ -1,20 +1,28 @@
 # Cognitive Services on Kubernetes
 
 ## Table of Contents <!-- omit in toc -->
+- [Cognitive Services on Kubernetes](#cognitive-services-on-kubernetes)
 - [Architecture Diagrams](#architecture-diagrams)
 - [Python Image Refresher](#python-image-refresher)
 - [Demo environment setup](#demo-environment-setup)
-    - [Dev Container](#dev-container)
-    - [Bash script](#bash-script)
-    - [Test UI](#test-ui)
-    - [Test with Python](#test-with-python)
-- [Lessons Learned](#lessons-learned)
+  - [Dev Container](#dev-container)
+  - [Bash script](#bash-script)
+    - [Prepare deployment.yaml](#prepare-deploymentyaml)
+  - [Test UI](#test-ui)
+  - [Test with Python](#test-with-python)
+- [Lessons learned](#lessons-learned)
+    - [1. NTP outbound](#1-ntp-outbound)
 
 
 # Architecture Diagrams
 
 We showcase the following entities in this repo:
 ![Architecture Diagram](images/Architecture.png)
+
+> [!NOTE]
+> In case RabbitMQ and `RWX` PVC's are not available, splitting of the document can be done in the client side:
+
+![Client side split](images/no-rabbit-mq-or-pvc.png)
 
 # Python Image Refresher
 The official docs below:
