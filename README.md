@@ -19,8 +19,7 @@
 We showcase the following entities in this repo:
 ![Architecture Diagram](images/Architecture.png)
 
-> [!NOTE]
-> In case RabbitMQ and `RWX` PVC's are not available, splitting of the document can be done in the client side:
+**Alternative**: In case RabbitMQ and `RWX` PVC's are not available, splitting of the document can be done in the client side:
 
 ![Client side split](images/no-rabbit-mq-or-pvc.png)
 
